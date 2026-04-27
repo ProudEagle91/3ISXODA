@@ -1,0 +1,1085 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <title>Калькулятор вилок на 3 исхода</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2px;
+            touch-action: manipulation;
+        }
+
+        .container {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+            max-width: 1000px;
+            width: 100%;
+            padding: 4px;
+            margin: 0 auto;
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 3px;
+            text-align: center;
+            font-size: 0.8em;
+            line-height: 1.1;
+        }
+
+        .outcomes-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 2px;
+            margin-bottom: 3px;
+        }
+
+        .outcome-block {
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            padding: 2px;
+            background: #fafafa;
+        }
+
+        .outcome-block:nth-child(1) {
+            border-color: #4CAF50;
+        }
+
+        .outcome-block:nth-child(2) {
+            border-color: #2196F3;
+        }
+
+        .outcome-block:nth-child(3) {
+            border-color: #FF9800;
+        }
+
+        .outcome-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1px;
+            gap: 2px;
+        }
+
+        .outcome-title {
+            font-size: 0.6em;
+            font-weight: 600;
+            line-height: 1.1;
+            white-space: nowrap;
+        }
+
+        .outcome-block:nth-child(1) .outcome-title {
+            color: #4CAF50;
+        }
+
+        .outcome-block:nth-child(2) .outcome-title {
+            color: #2196F3;
+        }
+
+        .outcome-block:nth-child(3) .outcome-title {
+            color: #FF9800;
+        }
+
+        .outcome-profit {
+            font-size: 0.5em;
+            font-weight: 700;
+            padding: 1px 4px;
+            border-radius: 2px;
+            white-space: nowrap;
+            line-height: 1.1;
+            background: #f0f0f0;
+            color: #666;
+        }
+
+        .outcome-profit.positive {
+            color: #2e7d32;
+            background: #c8e6c9;
+        }
+
+        .outcome-profit.negative {
+            color: #c62828;
+            background: #ffcdd2;
+        }
+
+        .outcome-profit.unequal {
+            animation: profit-warning 0.8s ease-in-out infinite;
+        }
+
+        @keyframes profit-warning {
+            0%, 100% { background: #ffcdd2; }
+            50% { background: #ff8a80; }
+        }
+
+        .stakes-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1px;
+        }
+
+        .stake-row {
+            background: white;
+            padding: 1px;
+            border-radius: 2px;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+            position: relative;
+        }
+
+        .stake-row.freebet {
+            background: #ffeb3b;
+            box-shadow: 0 0 6px rgba(255, 111, 0, 0.5), 0 1px 3px rgba(255, 111, 0, 0.3);
+            animation: freebet-glow 2s ease-in-out infinite;
+        }
+
+        .stake-row.auto-calculated {
+            background: #ccffcc;
+            box-shadow: 0 0 6px rgba(0, 200, 0, 0.4), 0 1px 3px rgba(0, 200, 0, 0.2);
+            animation: auto-glow 2s ease-in-out infinite;
+        }
+
+        @keyframes freebet-glow {
+            0%, 100% { box-shadow: 0 0 6px rgba(255, 111, 0, 0.5), 0 1px 3px rgba(255, 111, 0, 0.3); }
+            50% { box-shadow: 0 0 12px rgba(255, 111, 0, 0.8), 0 1px 6px rgba(255, 111, 0, 0.5); }
+        }
+
+        @keyframes auto-glow {
+            0%, 100% { box-shadow: 0 0 6px rgba(0, 200, 0, 0.4), 0 1px 3px rgba(0, 200, 0, 0.2); }
+            50% { box-shadow: 0 0 12px rgba(0, 200, 0, 0.7), 0 1px 6px rgba(0, 200, 0, 0.4); }
+        }
+
+        .stake-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3px;
+        }
+
+        .input-row {
+            display: flex;
+            align-items: center;
+            gap: 1px;
+        }
+
+        .input-row label {
+            font-size: 0.4em;
+            color: #666;
+            font-weight: 500;
+            white-space: nowrap;
+            min-width: 6px;
+        }
+
+        .input-row input {
+            flex: 1;
+            padding: 0.3px 1px;
+            border: 1px solid #e0e0e0;
+            border-radius: 1px;
+            font-size: 9px;
+            transition: border-color 0.3s;
+            -webkit-appearance: none;
+            appearance: none;
+            min-height: 14px;
+            width: 100%;
+        }
+
+        .input-row input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .amount-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 1px;
+            flex: 1;
+        }
+
+        .amount-wrapper input {
+            flex: 1;
+        }
+
+        .clear-amount-btn {
+            background: #ff9800;
+            color: white;
+            border: none;
+            padding: 0.3px 3px;
+            border-radius: 1px;
+            cursor: pointer;
+            font-size: 0.35em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background 0.3s;
+            flex-shrink: 0;
+            line-height: 1.2;
+            white-space: nowrap;
+            min-width: 22px;
+        }
+
+        .clear-amount-btn:hover {
+            background: #f57c00;
+        }
+
+        .stake-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 0.3px;
+            gap: 1px;
+            flex-wrap: wrap;
+        }
+
+        .controls-left {
+            display: flex;
+            align-items: center;
+            gap: 1px;
+        }
+
+        .tax-label, .freebet-label {
+            display: flex;
+            align-items: center;
+            gap: 0.5px;
+            cursor: pointer;
+            font-size: 0.4em;
+            color: #666;
+        }
+
+        .tax-label input[type="checkbox"],
+        .freebet-label input[type="checkbox"] {
+            width: 8px;
+            height: 8px;
+            cursor: pointer;
+            margin: 0;
+        }
+
+        .freebet-label {
+            color: #ff6f00;
+            font-weight: 700;
+            background: rgba(255, 235, 59, 0.3);
+            padding: 0 1px;
+            border-radius: 1px;
+        }
+
+        .remove-stake-btn {
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 0.3px 2px;
+            border-radius: 1px;
+            cursor: pointer;
+            font-size: 0.4em;
+            font-weight: 500;
+            transition: background 0.3s;
+            white-space: nowrap;
+            line-height: 1.2;
+        }
+
+        .remove-stake-btn:hover {
+            background: #cc0000;
+        }
+
+        .add-stake-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 1px;
+            border-radius: 2px;
+            cursor: pointer;
+            font-size: 0.45em;
+            transition: background 0.3s;
+            width: 100%;
+            font-weight: 500;
+            margin-top: 1px;
+            line-height: 1.2;
+        }
+
+        .add-stake-btn:hover {
+            background: #5a67d8;
+        }
+
+        .add-stake-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .calculate-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 5px;
+            border-radius: 4px;
+            font-size: 0.7em;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s, opacity 0.2s;
+            font-weight: 600;
+            margin-top: 3px;
+            line-height: 1.2;
+        }
+
+        .calculate-btn:active {
+            transform: scale(0.98);
+            opacity: 0.9;
+        }
+
+        .result-block {
+            margin-top: 3px;
+            padding: 3px;
+            border-radius: 4px;
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            display: none;
+        }
+
+        .result-block.show {
+            display: block;
+        }
+
+        .result-block.profit {
+            border-color: #4CAF50;
+            background: #f0f9f0;
+        }
+
+        .result-block.loss {
+            border-color: #ff4444;
+            background: #fff5f5;
+        }
+
+        .result-title {
+            font-size: 0.65em;
+            font-weight: 600;
+            margin-bottom: 2px;
+            text-align: center;
+            line-height: 1.1;
+        }
+
+        .result-block.profit .result-title {
+            color: #4CAF50;
+        }
+
+        .result-block.loss .result-title {
+            color: #ff4444;
+        }
+
+        .result-details {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2px;
+        }
+
+        .result-item {
+            background: white;
+            padding: 2px 3px;
+            border-radius: 2px;
+            box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+            text-align: center;
+        }
+
+        .result-item.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .result-item .label {
+            font-size: 0.45em;
+            color: #666;
+            margin-bottom: 0;
+            line-height: 1.1;
+        }
+
+        .result-item .value {
+            font-size: 0.65em;
+            font-weight: 600;
+            color: #333;
+            line-height: 1.1;
+        }
+
+        .result-item.freebet-conversion {
+            background: #fff9c4;
+            border: 1px solid #ff6f00;
+        }
+
+        .result-item.freebet-conversion .value {
+            color: #ff6f00;
+            font-size: 0.75em;
+        }
+
+        .error-message {
+            background: #fff5f5;
+            color: #cc0000;
+            padding: 3px;
+            border-radius: 3px;
+            border: 1px solid #ff4444;
+            margin-top: 2px;
+            display: none;
+            font-size: 0.55em;
+            line-height: 1.2;
+        }
+
+        .error-message.show {
+            display: block;
+            animation: error-shake 0.5s ease-in-out;
+        }
+
+        @keyframes error-shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-3px); }
+            75% { transform: translateX(3px); }
+        }
+
+        .error-message.warning {
+            background: #ffebee;
+            color: #b71c1c;
+            border-color: #d32f2f;
+            font-weight: 600;
+            font-size: 0.6em;
+        }
+
+        @media (max-width: 360px) {
+            .outcomes-wrapper {
+                grid-template-columns: 1fr 1fr 1fr;
+                gap: 1px;
+            }
+            
+            .input-row input {
+                padding: 0.2px 1px;
+                font-size: 8px;
+                min-height: 12px;
+            }
+            
+            .input-row label {
+                font-size: 0.35em;
+            }
+            
+            .clear-amount-btn {
+                font-size: 0.3em;
+                min-width: 18px;
+            }
+            
+            .outcome-profit {
+                font-size: 0.4em;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                padding: 6px;
+            }
+            
+            h1 {
+                font-size: 1em;
+                margin-bottom: 6px;
+            }
+            
+            .outcomes-wrapper {
+                gap: 4px;
+                margin-bottom: 6px;
+            }
+            
+            .outcome-block {
+                padding: 4px;
+            }
+            
+            .outcome-title {
+                font-size: 0.75em;
+            }
+            
+            .stake-row {
+                padding: 2px 3px;
+            }
+            
+            .input-row label {
+                font-size: 0.55em;
+            }
+            
+            .input-row input {
+                padding: 1px 2px;
+                font-size: 11px;
+                min-height: 18px;
+            }
+            
+            .tax-label, .freebet-label {
+                font-size: 0.55em;
+            }
+            
+            .tax-label input[type="checkbox"],
+            .freebet-label input[type="checkbox"] {
+                width: 10px;
+                height: 10px;
+            }
+            
+            .remove-stake-btn {
+                font-size: 0.55em;
+                padding: 1px 3px;
+            }
+            
+            .add-stake-btn {
+                font-size: 0.6em;
+                padding: 2px;
+            }
+            
+            .calculate-btn {
+                font-size: 0.85em;
+                padding: 7px;
+            }
+            
+            .result-title {
+                font-size: 0.8em;
+            }
+            
+            .result-item .label {
+                font-size: 0.6em;
+            }
+            
+            .result-item .value {
+                font-size: 0.8em;
+            }
+            
+            .clear-amount-btn {
+                font-size: 0.45em;
+                min-width: 30px;
+            }
+            
+            .outcome-profit {
+                font-size: 0.65em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Калькулятор вилок (3 исхода)</h1>
+
+        <div class="outcomes-wrapper">
+            <div class="outcome-block">
+                <div class="outcome-header">
+                    <span class="outcome-title">Исход 1</span>
+                    <span class="outcome-profit" id="profit1">0 ₽</span>
+                </div>
+                <div class="stakes-container" id="stakes1-container"></div>
+                <button class="add-stake-btn" onclick="addStake(1)">+ Ставка</button>
+            </div>
+
+            <div class="outcome-block">
+                <div class="outcome-header">
+                    <span class="outcome-title">Исход 2</span>
+                    <span class="outcome-profit" id="profit2">0 ₽</span>
+                </div>
+                <div class="stakes-container" id="stakes2-container"></div>
+                <button class="add-stake-btn" onclick="addStake(2)">+ Ставка</button>
+            </div>
+
+            <div class="outcome-block">
+                <div class="outcome-header">
+                    <span class="outcome-title">Исход 3</span>
+                    <span class="outcome-profit" id="profit3">0 ₽</span>
+                </div>
+                <div class="stakes-container" id="stakes3-container"></div>
+                <button class="add-stake-btn" onclick="addStake(3)">+ Ставка</button>
+            </div>
+        </div>
+
+        <button class="calculate-btn" onclick="calculate()">📊 Рассчитать</button>
+
+        <div class="error-message" id="error-message"></div>
+
+        <div class="result-block" id="result-block">
+            <div class="result-title" id="result-title"></div>
+            <div class="result-details">
+                <div class="result-item">
+                    <div class="label">Общая сумма</div>
+                    <div class="value" id="total-stake">0 ₽</div>
+                </div>
+                <div class="result-item">
+                    <div class="label">Прибыль</div>
+                    <div class="value" id="profit">0 ₽</div>
+                </div>
+                <div class="result-item full-width freebet-conversion">
+                    <div class="label">% перевода фрибета в деньги</div>
+                    <div class="value" id="freebet-conversion">0%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const MAX_STAKES_PER_OUTCOME = 10;
+        let lastAutoCalculatedIds = [];
+
+        function init() {
+            // Исход 1: одна ставка с суммой 0
+            addStakeWithAmount(1, 0);
+            // Исход 2: одна ставка с пустой суммой (авто)
+            addStakeWithEmptyAmount(2);
+            // Исход 3: одна ставка с пустой суммой (авто)
+            addStakeWithEmptyAmount(3);
+        }
+
+        function addStakeWithEmptyAmount(outcomeNum) {
+            const container = document.getElementById(`stakes${outcomeNum}-container`);
+            const stakeId = Date.now() + Math.random();
+            const stakeDiv = document.createElement('div');
+            stakeDiv.className = 'stake-row auto-calculated';
+            stakeDiv.id = `stake-${stakeId}`;
+
+            stakeDiv.innerHTML = `
+                <div class="stake-inputs">
+                    <div class="input-row">
+                        <label>K</label>
+                        <input type="number" class="coeff-input" step="0.01" min="1.01" value="2.00" required inputmode="decimal">
+                    </div>
+                    <div class="input-row">
+                        <label>S</label>
+                        <div class="amount-wrapper">
+                            <input type="number" class="amount-input" step="0.01" min="0" placeholder="Авто" inputmode="decimal" oninput="updateAutoHighlight()">
+                            <button class="clear-amount-btn" onclick="clearAmount(${outcomeNum}, '${stakeId}')" title="Очистить сумму">очистить</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="stake-controls">
+                    <div class="controls-left">
+                        <label class="freebet-label">
+                            <input type="checkbox" class="freebet-input" onchange="toggleFreebet(this, '${stakeId}')">
+                            <span>F</span>
+                        </label>
+                        <label class="tax-label">
+                            <input type="checkbox" class="tax-input" onchange="updateAutoHighlight()">
+                            <span>13%</span>
+                        </label>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(stakeDiv);
+            lastAutoCalculatedIds.push(stakeDiv.id);
+        }
+
+        function addStakeWithAmount(outcomeNum, amount) {
+            const container = document.getElementById(`stakes${outcomeNum}-container`);
+            const stakeId = Date.now() + Math.random();
+            const stakeDiv = document.createElement('div');
+            stakeDiv.className = 'stake-row';
+            stakeDiv.id = `stake-${stakeId}`;
+
+            stakeDiv.innerHTML = `
+                <div class="stake-inputs">
+                    <div class="input-row">
+                        <label>K</label>
+                        <input type="number" class="coeff-input" step="0.01" min="1.01" value="2.00" required inputmode="decimal">
+                    </div>
+                    <div class="input-row">
+                        <label>S</label>
+                        <div class="amount-wrapper">
+                            <input type="number" class="amount-input" step="0.01" min="0" value="${amount}" inputmode="decimal" oninput="updateAutoHighlight()">
+                            <button class="clear-amount-btn" onclick="clearAmount(${outcomeNum}, '${stakeId}')" title="Очистить сумму">очистить</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="stake-controls">
+                    <div class="controls-left">
+                        <label class="freebet-label">
+                            <input type="checkbox" class="freebet-input" onchange="toggleFreebet(this, '${stakeId}')">
+                            <span>F</span>
+                        </label>
+                        <label class="tax-label">
+                            <input type="checkbox" class="tax-input" onchange="updateAutoHighlight()">
+                            <span>13%</span>
+                        </label>
+                    </div>
+                </div>
+            `;
+
+            container.appendChild(stakeDiv);
+        }
+
+        function addStake(outcomeNum, checkLimit = true) {
+            const container = document.getElementById(`stakes${outcomeNum}-container`);
+            const existingStakes = container.querySelectorAll('.stake-row');
+
+            if (checkLimit && existingStakes.length >= MAX_STAKES_PER_OUTCOME) {
+                alert(`Максимальное количество ставок на исход: ${MAX_STAKES_PER_OUTCOME}`);
+                return;
+            }
+
+            const stakeId = Date.now() + Math.random();
+            const stakeDiv = document.createElement('div');
+            stakeDiv.className = 'stake-row';
+            stakeDiv.id = `stake-${stakeId}`;
+
+            stakeDiv.innerHTML = `
+                <div class="stake-inputs">
+                    <div class="input-row">
+                        <label>K</label>
+                        <input type="number" class="coeff-input" step="0.01" min="1.01" value="2.00" required inputmode="decimal">
+                    </div>
+                    <div class="input-row">
+                        <label>S</label>
+                        <div class="amount-wrapper">
+                            <input type="number" class="amount-input" step="0.01" min="0" placeholder="Авто" inputmode="decimal" oninput="updateAutoHighlight()">
+                            <button class="clear-amount-btn" onclick="clearAmount(${outcomeNum}, '${stakeId}')" title="Очистить сумму">очистить</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="stake-controls">
+                    <div class="controls-left">
+                        <label class="freebet-label">
+                            <input type="checkbox" class="freebet-input" onchange="toggleFreebet(this, '${stakeId}')">
+                            <span>F</span>
+                        </label>
+                        <label class="tax-label">
+                            <input type="checkbox" class="tax-input" onchange="updateAutoHighlight()">
+                            <span>13%</span>
+                        </label>
+                    </div>
+                    ${existingStakes.length >= 1 ? 
+                        `<button class="remove-stake-btn" onclick="removeStake(${outcomeNum}, '${stakeId}')">✕</button>` 
+                        : ''}
+                </div>
+            `;
+
+            container.appendChild(stakeDiv);
+            updateRemoveButtons();
+            updateAutoHighlight();
+        }
+
+        function clearAmount(outcomeNum, stakeId) {
+            const stakeDiv = document.getElementById(`stake-${stakeId}`);
+            if (stakeDiv) {
+                const amountInput = stakeDiv.querySelector('.amount-input');
+                amountInput.value = '';
+                amountInput.focus();
+                updateAutoHighlight();
+            }
+        }
+
+        function toggleFreebet(checkbox, stakeId) {
+            const stakeDiv = document.getElementById(`stake-${stakeId}`);
+            if (stakeDiv) {
+                if (checkbox.checked) {
+                    stakeDiv.classList.add('freebet');
+                } else {
+                    stakeDiv.classList.remove('freebet');
+                }
+            }
+        }
+
+        function updateAutoHighlight() {
+            document.querySelectorAll('.stake-row.auto-calculated').forEach(row => {
+                row.classList.remove('auto-calculated');
+            });
+
+            const allAmountInputs = document.querySelectorAll('.amount-input');
+            let emptyIds = [];
+
+            allAmountInputs.forEach(input => {
+                if (!input.value) {
+                    const row = input.closest('.stake-row');
+                    if (row) emptyIds.push(row.id);
+                }
+            });
+
+            emptyIds.forEach(id => {
+                const row = document.getElementById(id);
+                if (row) row.classList.add('auto-calculated');
+            });
+        }
+
+        function removeStake(outcomeNum, stakeId) {
+            const stakeDiv = document.getElementById(`stake-${stakeId}`);
+            if (stakeDiv) {
+                lastAutoCalculatedIds = lastAutoCalculatedIds.filter(id => id !== stakeDiv.id);
+                stakeDiv.remove();
+                updateRemoveButtons();
+                updateAutoHighlight();
+            }
+        }
+
+        function updateRemoveButtons() {
+            [1, 2, 3].forEach(outcomeNum => {
+                const stakes = document.querySelectorAll(`#stakes${outcomeNum}-container .stake-row`);
+                stakes.forEach(stake => {
+                    const controlsDiv = stake.querySelector('.stake-controls');
+                    const removeBtn = controlsDiv.querySelector('.remove-stake-btn');
+                    
+                    if (stakes.length <= 1) {
+                        if (removeBtn) removeBtn.style.display = 'none';
+                    } else {
+                        if (removeBtn) {
+                            removeBtn.style.display = 'block';
+                        } else {
+                            const newBtn = document.createElement('button');
+                            newBtn.className = 'remove-stake-btn';
+                            newBtn.textContent = '✕';
+                            newBtn.onclick = function() { 
+                                removeStake(outcomeNum, stake.id.replace('stake-', '')); 
+                            };
+                            controlsDiv.appendChild(newBtn);
+                        }
+                    }
+                });
+            });
+        }
+
+        function getStakesData(outcomeNum) {
+            const container = document.getElementById(`stakes${outcomeNum}-container`);
+            const stakeRows = container.querySelectorAll('.stake-row');
+            const stakes = [];
+
+            stakeRows.forEach(row => {
+                const coeff = parseFloat(row.querySelector('.coeff-input').value);
+                const amountInput = row.querySelector('.amount-input');
+                const amount = amountInput.value ? parseFloat(amountInput.value) : null;
+                const tax = row.querySelector('.tax-input').checked;
+                const isFreebet = row.querySelector('.freebet-input').checked;
+
+                stakes.push({
+                    coeff: coeff || 2.00,
+                    amount: amount,
+                    tax: tax,
+                    isFreebet: isFreebet,
+                    rowId: row.id
+                });
+            });
+
+            return stakes;
+        }
+
+        function calculate() {
+            const errorDiv = document.getElementById('error-message');
+            const resultDiv = document.getElementById('result-block');
+            
+            errorDiv.classList.remove('show', 'warning');
+            resultDiv.classList.remove('show', 'profit', 'loss');
+
+            for (let i = 1; i <= 3; i++) {
+                const profitEl = document.getElementById(`profit${i}`);
+                profitEl.textContent = '0 ₽';
+                profitEl.classList.remove('positive', 'negative', 'unequal');
+            }
+
+            try {
+                const outcome1 = getStakesData(1);
+                const outcome2 = getStakesData(2);
+                const outcome3 = getStakesData(3);
+
+                function checkAutoStakes(stakes, outcomeNum) {
+                    const autoStakes = stakes.filter(s => s.amount === null);
+                    if (autoStakes.length > 1) {
+                        throw new Error(`В исходе ${outcomeNum} больше одной ставки с автоматическим расчётом (${autoStakes.length}). Должна быть только одна.`);
+                    }
+                }
+
+                checkAutoStakes(outcome1, 1);
+                checkAutoStakes(outcome2, 2);
+                checkAutoStakes(outcome3, 3);
+
+                function processStakes(stakes) {
+                    return stakes.map(s => {
+                        let eff;
+                        if (s.isFreebet) {
+                            if (s.tax) {
+                                eff = (s.coeff - 1) * 0.87;
+                            } else {
+                                eff = s.coeff - 1;
+                            }
+                        } else if (s.tax) {
+                            eff = 0.87 * s.coeff + 0.13;
+                        } else {
+                            eff = s.coeff;
+                        }
+                        return {
+                            ...s,
+                            eff: eff
+                        };
+                    });
+                }
+
+                const s1 = processStakes(outcome1);
+                const s2 = processStakes(outcome2);
+                const s3 = processStakes(outcome3);
+
+                const unknown1 = s1.filter(s => s.amount === null);
+                const unknown2 = s2.filter(s => s.amount === null);
+                const unknown3 = s3.filter(s => s.amount === null);
+                const allUnknown = [...unknown1, ...unknown2, ...unknown3];
+                const totalUnknown = allUnknown.length;
+
+                if (totalUnknown < 2) {
+                    throw new Error(`Должно быть минимум 2 незаполненные суммы. Сейчас: ${totalUnknown}.`);
+                }
+
+                const knownPayout1 = s1.filter(s => s.amount !== null).reduce((sum, s) => sum + s.amount * s.eff, 0);
+                const knownPayout2 = s2.filter(s => s.amount !== null).reduce((sum, s) => sum + s.amount * s.eff, 0);
+                const knownPayout3 = s3.filter(s => s.amount !== null).reduce((sum, s) => sum + s.amount * s.eff, 0);
+
+                const targetPayout = Math.max(knownPayout1, knownPayout2, knownPayout3);
+
+                lastAutoCalculatedIds = [];
+                
+                allUnknown.forEach(unknown => {
+                    const eff = unknown.eff;
+                    if (eff === 0) throw new Error('Коэффициент не может быть нулевым');
+                    
+                    let neededPayout;
+                    if (unknown1.includes(unknown)) {
+                        neededPayout = targetPayout - knownPayout1;
+                    } else if (unknown2.includes(unknown)) {
+                        neededPayout = targetPayout - knownPayout2;
+                    } else {
+                        neededPayout = targetPayout - knownPayout3;
+                    }
+                    
+                    if (neededPayout < 0) neededPayout = 0;
+                    
+                    const x = neededPayout / eff;
+                    unknown.amount = x;
+                    lastAutoCalculatedIds.push(unknown.rowId);
+                });
+
+                fillAllUnknownAmounts(outcome1, outcome2, outcome3, s1, s2, s3);
+
+                const totalFreebetAmount = [...s1, ...s2, ...s3].reduce((sum, s) => {
+                    if (s.isFreebet) return sum + (s.amount || 0);
+                    return sum;
+                }, 0);
+
+                const totalStake = [...s1, ...s2, ...s3].reduce((sum, s) => {
+                    if (s.isFreebet) return sum;
+                    return sum + (s.amount || 0);
+                }, 0);
+
+                const payout1 = s1.reduce((sum, s) => sum + (s.amount || 0) * s.eff, 0);
+                const payout2 = s2.reduce((sum, s) => sum + (s.amount || 0) * s.eff, 0);
+                const payout3 = s3.reduce((sum, s) => sum + (s.amount || 0) * s.eff, 0);
+
+                const profit1 = payout1 - totalStake;
+                const profit2 = payout2 - totalStake;
+                const profit3 = payout3 - totalStake;
+
+                const profits = [profit1, profit2, profit3];
+                const maxProfit = Math.max(...profits);
+                const minProfit = Math.min(...profits);
+                const areEqual = Math.abs(maxProfit - minProfit) < 0.01;
+
+                displayOutcomeProfits(profit1, profit2, profit3, !areEqual);
+
+                if (!areEqual) {
+                    errorDiv.textContent = '⚠️ Доходы по исходам не одинаковые! Разница: ' + (maxProfit - minProfit).toFixed(2) + ' ₽';
+                    errorDiv.classList.add('show', 'warning');
+                }
+                
+                const payout = Math.max(payout1, payout2, payout3);
+                const netProfit = areEqual ? profit1 : maxProfit;
+                const freebetConversion = totalFreebetAmount > 0 ? (netProfit / totalFreebetAmount) * 100 : 0;
+
+                displayResult(totalStake, netProfit, freebetConversion, !areEqual);
+                highlightAutoCalculated();
+
+            } catch (error) {
+                errorDiv.textContent = '❌ ' + error.message;
+                errorDiv.classList.add('show');
+                errorDiv.classList.remove('warning');
+            }
+        }
+
+        function displayOutcomeProfits(profit1, profit2, profit3, isUnequal) {
+            const profits = [
+                { id: 'profit1', profit: profit1 },
+                { id: 'profit2', profit: profit2 },
+                { id: 'profit3', profit: profit3 }
+            ];
+
+            profits.forEach(({ id, profit }) => {
+                const profitEl = document.getElementById(id);
+                
+                profitEl.textContent = `${profit >= 0 ? '+' : ''}${profit.toFixed(2)} ₽`;
+                
+                profitEl.classList.remove('positive', 'negative', 'unequal');
+                if (isUnequal) {
+                    profitEl.classList.add('negative', 'unequal');
+                } else if (profit > 0.005) {
+                    profitEl.classList.add('positive');
+                } else if (profit < -0.005) {
+                    profitEl.classList.add('negative');
+                }
+            });
+        }
+
+        function highlightAutoCalculated() {
+            document.querySelectorAll('.stake-row.auto-calculated').forEach(row => {
+                row.classList.remove('auto-calculated');
+            });
+            
+            lastAutoCalculatedIds.forEach(id => {
+                const row = document.getElementById(id);
+                if (row) {
+                    row.classList.add('auto-calculated');
+                }
+            });
+        }
+
+        function fillAllUnknownAmounts(outcome1, outcome2, outcome3, s1, s2, s3) {
+            const inputs1 = document.querySelectorAll('#stakes1-container .stake-row .amount-input');
+            const inputs2 = document.querySelectorAll('#stakes2-container .stake-row .amount-input');
+            const inputs3 = document.querySelectorAll('#stakes3-container .stake-row .amount-input');
+
+            s1.forEach((stake, i) => {
+                if (stake.amount !== null && outcome1[i].amount === null) {
+                    inputs1[i].value = stake.amount.toFixed(2);
+                }
+            });
+
+            s2.forEach((stake, i) => {
+                if (stake.amount !== null && outcome2[i].amount === null) {
+                    inputs2[i].value = stake.amount.toFixed(2);
+                }
+            });
+
+            s3.forEach((stake, i) => {
+                if (stake.amount !== null && outcome3[i].amount === null) {
+                    inputs3[i].value = stake.amount.toFixed(2);
+                }
+            });
+        }
+
+        function displayResult(totalStake, netProfit, freebetConversion, isUnequal) {
+            const resultDiv = document.getElementById('result-block');
+            const resultTitle = document.getElementById('result-title');
+            
+            document.getElementById('total-stake').textContent = totalStake.toFixed(2) + ' ₽';
+            document.getElementById('profit').textContent = (netProfit >= 0 ? '+' : '') + netProfit.toFixed(2) + ' ₽';
+            document.getElementById('freebet-conversion').textContent = freebetConversion.toFixed(2) + '%';
+
+            resultDiv.classList.remove('profit', 'loss');
+            if (isUnequal) {
+                resultDiv.classList.add('loss');
+                resultTitle.textContent = '⚠️ Доходы не равны!';
+            } else if (netProfit > 0.005) {
+                resultDiv.classList.add('profit');
+                resultTitle.textContent = '✅ Прибыльная вилка!';
+            } else if (netProfit < -0.005) {
+                resultDiv.classList.add('loss');
+                resultTitle.textContent = '⚠️ Убыточная вилка';
+            } else {
+                resultDiv.classList.add('loss');
+                resultTitle.textContent = '⚪ Безубыточная вилка';
+            }
+
+            resultDiv.classList.add('show');
+        }
+
+        window.onload = init;
+    </script>
+</body>
+</html>
